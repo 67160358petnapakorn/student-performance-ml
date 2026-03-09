@@ -1,20 +1,26 @@
 import streamlit as st
-import pandas as pd
 import joblib
+import numpy as np
 
-st.title("Student Exam Score Prediction")
+st.title("🎓 Student Performance Predictor")
 
-model = joblib.load("student_score_model.pkl")
-features = joblib.load("features.pkl")
+@st.cache_resource
+def load_model():
+    model = joblib.load("student_score_model.pkl")
+    return model
 
-input_data = {}
+model = load_model()
 
-for feature in features:
-    value = st.number_input(feature, value=0.0)
-    input_data[feature] = value
+st.write("Enter student study information")
 
-input_df = pd.DataFrame([input_data])
+study_hours = st.slider("Study Hours", 0, 10, 5)
+attendance = st.slider("Attendance (%)", 0, 100, 80)
+sleep_hours = st.slider("Sleep Hours", 0, 10, 7)
+previous_score = st.slider("Previous Score", 0, 100, 60)
 
-if st.button("Predict"):
-    prediction = model.predict(input_df)
-    st.write("Predicted Exam Score:", prediction[0])
+input_data = np.array([[study_hours, attendance, sleep_hours, previous_score]])
+
+if st.button("Predict Score"):
+    prediction = model.predict(input_data)
+
+    st.success(f"📊 Predicted Score: {prediction[0]:.2f}")
